@@ -25,6 +25,29 @@ app.get("/test-db", async (req, res) => {
     res.json(data);
 });
 
+app.get("/games", async (req, res) => {
+    const { data, error } = await supabase
+        .from("games")
+        .select("*")
+        .order("id", { ascending: true });
+
+    if (error) {
+        console.error("Error al obtener videojuegos desde Supabase:", {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint
+        });
+
+        return res.status(500).json({
+            message: "No se pudieron obtener los videojuegos.",
+            error: error.message
+        });
+    }
+
+    res.json(data);
+});
+
 app.post("/games", async (req, res) => {
     const { title, genre, platform, developer, release_year, price } = req.body;
     const newGame = {
