@@ -23,6 +23,73 @@ const formFields = {
 // TODO(update): Preparar la accion del boton Editar para completar el formulario.
 // TODO(delete): Preparar la accion del boton Eliminar para quitar un registro.
 
+function showEmptyTableMessage() {
+    gamesTableBody.innerHTML = `
+        <tr>
+            <td colspan="7" class="empty-message">No hay videojuegos registrados.</td>
+        </tr>
+    `;
+}
+
+function createTableCell(text) {
+    const cell = document.createElement("td");
+    cell.textContent = text;
+    return cell;
+}
+
+function renderGames(games) {
+    gamesTableBody.innerHTML = "";
+
+    if (!games.length) {
+        showEmptyTableMessage();
+        return;
+    }
+
+    games.forEach((game) => {
+        const row = document.createElement("tr");
+        const actionsCell = document.createElement("td");
+        const editButton = document.createElement("button");
+        const deleteButton = document.createElement("button");
+
+        actionsCell.classList.add("actions");
+        editButton.type = "button";
+        editButton.classList.add("secondary-button");
+        editButton.textContent = "Editar";
+        deleteButton.type = "button";
+        deleteButton.classList.add("danger-button");
+        deleteButton.textContent = "Eliminar";
+
+        actionsCell.append(editButton, deleteButton);
+        row.append(
+            createTableCell(game.title),
+            createTableCell(game.genre),
+            createTableCell(game.platform),
+            createTableCell(game.developer),
+            createTableCell(game.release_year),
+            createTableCell(`$${Number(game.price).toFixed(2)}`),
+            actionsCell
+        );
+
+        gamesTableBody.appendChild(row);
+    });
+}
+
+async function loadGames() {
+    try {
+        const response = await fetch("/games");
+        const games = await response.json();
+
+        if (!response.ok) {
+            throw new Error(games.message || "No se pudieron cargar los videojuegos.");
+        }
+
+        renderGames(games);
+    } catch (error) {
+        console.error("Error al cargar videojuegos:", error);
+        showEmptyTableMessage();
+    }
+}
+
 gameForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -63,3 +130,5 @@ gameForm.addEventListener("submit", async (event) => {
         alert(error.message || "Ocurrio un error al guardar el videojuego.");
     }
 });
+
+document.addEventListener("DOMContentLoaded", loadGames);
