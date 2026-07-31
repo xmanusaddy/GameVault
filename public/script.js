@@ -1,4 +1,3 @@
-// Elementos principales del frontend.
 const loginScreen = document.querySelector("#login-screen");
 const appContent = document.querySelector("#app-content");
 const googleLoginButton = document.querySelector("#google-login-button");
@@ -19,7 +18,6 @@ let currentGames = [];
 let editingGameId = null;
 let supabaseClient = null;
 
-// Objeto base para mantener organizadas futuras referencias del formulario.
 const formFields = {
     name: gameNameInput,
     genre: gameGenreInput,
@@ -28,11 +26,6 @@ const formFields = {
     year: gameYearInput,
     price: gamePriceInput
 };
-
-// TODO(create): Mejorar la experiencia visual del mensaje de resultado.
-// TODO(read): Cargar los videojuegos desde el backend o Supabase.
-// TODO(update): Preparar la accion del boton Editar para completar el formulario.
-// TODO(delete): Preparar la accion del boton Eliminar para quitar un registro.
 
 async function initializeSupabaseAuth() {
     const response = await fetch("/supabase-config");
@@ -250,7 +243,7 @@ gamesTableBody.addEventListener("click", (event) => {
 async function deleteGame(gameId) {
     const selectedGame = currentGames.find((game) => game.id === gameId);
     const gameTitle = selectedGame ? selectedGame.title : "este videojuego";
-    const shouldDelete = confirm(`¿Seguro que deseas eliminar "${gameTitle}"?`);
+    const shouldDelete = confirm(`Seguro que deseas eliminar "${gameTitle}"?`);
 
     if (!shouldDelete) {
         return;
