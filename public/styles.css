@@ -31,10 +31,107 @@ input {
     font: inherit;
 }
 
+.hidden {
+    display: none !important;
+}
+
+.login-screen {
+    display: grid;
+    min-height: 100vh;
+    place-items: center;
+    padding: 24px;
+    position: relative;
+}
+
+.login-brand {
+    position: absolute;
+    top: 28px;
+    left: 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.35rem;
+    font-weight: 800;
+}
+
+.login-card {
+    width: min(420px, 100%);
+    padding: 28px;
+    text-align: center;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(18, 26, 47, 0.92);
+    box-shadow: var(--shadow);
+}
+
+.login-title {
+    margin-bottom: 12px;
+    font-size: clamp(2.4rem, 8vw, 4rem);
+    color: transparent;
+    background: linear-gradient(135deg, var(--accent), var(--accent-blue), #9b7cff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    text-shadow: 0 0 28px rgba(58, 167, 255, 0.38);
+}
+
+.login-card .primary-button {
+    margin-top: 22px;
+}
+
+.login-footer {
+    position: absolute;
+    right: 24px;
+    bottom: 18px;
+    left: 24px;
+}
+
 .app {
     width: min(1120px, calc(100% - 32px));
     margin: 0 auto;
     padding: 40px 0 28px;
+}
+
+.user-panel {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.user-avatar {
+    width: 42px;
+    height: 42px;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    max-width: 240px;
+    text-align: right;
+}
+
+.user-details span {
+    font-weight: 700;
+}
+
+.user-details small {
+    color: var(--muted);
+}
+
+.brand-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.brand-icon {
+    width: clamp(54px, 8vw, 76px);
+    height: auto;
+    flex: 0 0 auto;
 }
 
 .app-header {
