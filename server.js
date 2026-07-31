@@ -162,6 +162,48 @@ app.put("/games/:id", async (req, res) => {
     }
 });
 
+app.delete("/games/:id", async (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({
+            message: "El id del videojuego es obligatorio."
+        });
+    }
+
+    try {
+        const { error } = await supabase
+            .from("games")
+            .delete()
+            .eq("id", id);
+
+        if (error) {
+            console.error("Error al eliminar videojuego en Supabase:", {
+                id,
+                code: error.code,
+                message: error.message,
+                details: error.details,
+                hint: error.hint
+            });
+
+            return res.status(500).json({
+                message: "No se pudo eliminar el videojuego.",
+                error: error.message
+            });
+        }
+
+        res.json({
+            message: "Videojuego eliminado correctamente."
+        });
+    } catch (error) {
+        console.error("Error inesperado en DELETE /games/:id:", error);
+
+        res.status(500).json({
+            message: "Ocurrio un error inesperado al eliminar el videojuego."
+        });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
 });

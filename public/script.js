@@ -61,6 +61,7 @@ function renderGames(games) {
         editButton.classList.add("secondary-button");
         editButton.textContent = "Editar";
         deleteButton.type = "button";
+        deleteButton.dataset.id = game.id;
         deleteButton.classList.add("danger-button");
         deleteButton.textContent = "Eliminar";
 
@@ -151,26 +152,58 @@ gameForm.addEventListener("submit", async (event) => {
 
         alert(result.message || "Videojuego agregado correctamente.");
         resetFormMode();
-
-        if (method === "PUT") {
-            await loadGames();
-        }
+        await loadGames();
     } catch (error) {
         alert(error.message || "Ocurrio un error al guardar el videojuego.");
     }
 });
 
 gamesTableBody.addEventListener("click", (event) => {
-    if (!event.target.classList.contains("secondary-button")) {
+    const gameId = Number(event.target.dataset.id);
+
+    if (event.target.classList.contains("secondary-button")) {
+        const selectedGame = currentGames.find((game) => game.id === gameId);
+
+        if (selectedGame) {
+            fillFormForEdit(selectedGame);
+        }
+
         return;
     }
 
-    const gameId = Number(event.target.dataset.id);
-    const selectedGame = currentGames.find((game) => game.id === gameId);
-
-    if (selectedGame) {
-        fillFormForEdit(selectedGame);
+    if (event.target.classList.contains("danger-button")) {
+        deleteGame(gameId);
     }
 });
+
+async function deleteGame(gameId) {
+    const selectedGame = currentGames.find((game) => game.id === gameId);
+    const gameTitle = selectedGame ? selectedGame.title : "este videojuego";
+    const shouldDelete = confirm(`¿Seguro que deseas eliminar "${gameTitle}"?`);
+
+    if (!shouldDelete) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/games/${gameId}`, {
+            method: "DELETE"
+        });
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || "No se pudo eliminar el videojuego.");
+        }
+
+        if (editingGameId === gameId) {
+            resetFormMode();
+        }
+
+        alert(result.message || "Videojuego eliminado correctamente.");
+        await loadGames();
+    } catch (error) {
+        alert(error.message || "Ocurrio un error al eliminar el videojuego.");
+    }
+}
 
 document.addEventListener("DOMContentLoaded", loadGames);
