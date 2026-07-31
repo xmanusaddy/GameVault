@@ -66,7 +66,14 @@ app.post("/games", async (req, res) => {
         price: Number(price)
     };
 
-    if (!newGame.title || !newGame.genre || !newGame.platform || !newGame.developer || !newGame.release_year || Number.isNaN(newGame.price)) {
+    if (
+        !newGame.title ||
+        !newGame.genre ||
+        !newGame.platform ||
+        !newGame.developer ||
+        !newGame.release_year ||
+        Number.isNaN(newGame.price)
+    ) {
         return res.status(400).json({
             message: "Todos los campos son obligatorios."
         });
@@ -126,7 +133,15 @@ app.put("/games/:id", async (req, res) => {
         price: Number(price)
     };
 
-    if (!id || !updatedGame.title || !updatedGame.genre || !updatedGame.platform || !updatedGame.developer || !updatedGame.release_year || Number.isNaN(updatedGame.price)) {
+    if (
+        !id ||
+        !updatedGame.title ||
+        !updatedGame.genre ||
+        !updatedGame.platform ||
+        !updatedGame.developer ||
+        !updatedGame.release_year ||
+        Number.isNaN(updatedGame.price)
+    ) {
         return res.status(400).json({
             message: "Todos los campos son obligatorios."
         });
@@ -211,6 +226,4 @@ app.delete("/games/:id", async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
-});
+app.listen(PORT);
