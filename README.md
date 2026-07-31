@@ -36,9 +36,9 @@ Toda la información se almacena en una base de datos de Supabase y es administr
 ## 🛠️ Tecnologías utilizadas
 
 ### Frontend
-- HTML5
-- CSS3
-- JavaScript (Vanilla)
+- HTML
+- CSS
+- JavaScript
 
 ### Backend
 - Node.js
