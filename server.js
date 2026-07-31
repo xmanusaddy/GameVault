@@ -25,6 +25,13 @@ app.get("/test-db", async (req, res) => {
     res.json(data);
 });
 
+app.get("/supabase-config", (req, res) => {
+    res.json({
+        url: process.env.SUPABASE_URL,
+        key: process.env.SUPABASE_KEY
+    });
+});
+
 app.get("/games", async (req, res) => {
     const { data, error } = await supabase
         .from("games")

@@ -1,4 +1,11 @@
 // Elementos principales del frontend.
+const loginScreen = document.querySelector("#login-screen");
+const appContent = document.querySelector("#app-content");
+const googleLoginButton = document.querySelector("#google-login-button");
+const logoutButton = document.querySelector("#logout-button");
+const userAvatar = document.querySelector("#user-avatar");
+const userName = document.querySelector("#user-name");
+const userEmail = document.querySelector("#user-email");
 const gameForm = document.querySelector("#game-form");
 const gameNameInput = document.querySelector("#game-name");
 const gameGenreInput = document.querySelector("#game-genre");
@@ -10,6 +17,7 @@ const gamesTableBody = document.querySelector("#games-table-body");
 const submitButton = gameForm.querySelector(".primary-button");
 let currentGames = [];
 let editingGameId = null;
+let supabaseClient = null;
 
 // Objeto base para mantener organizadas futuras referencias del formulario.
 const formFields = {
@@ -25,6 +33,69 @@ const formFields = {
 // TODO(read): Cargar los videojuegos desde el backend o Supabase.
 // TODO(update): Preparar la accion del boton Editar para completar el formulario.
 // TODO(delete): Preparar la accion del boton Eliminar para quitar un registro.
+
+async function initializeSupabaseAuth() {
+    const response = await fetch("/supabase-config");
+    const config = await response.json();
+
+    supabaseClient = supabase.createClient(config.url, config.key);
+
+    const { data } = await supabaseClient.auth.getSession();
+    handleSession(data.session);
+
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+        handleSession(session);
+    });
+}
+
+function handleSession(session) {
+    if (session) {
+        showApp(session.user);
+        loadGames();
+        return;
+    }
+
+    showLogin();
+}
+
+function showApp(user) {
+    const userMetadata = user.user_metadata || {};
+
+    userAvatar.src = userMetadata.avatar_url || "";
+    userName.textContent = userMetadata.full_name || userMetadata.name || "Usuario";
+    userEmail.textContent = user.email || "";
+    loginScreen.classList.add("hidden");
+    appContent.classList.remove("hidden");
+}
+
+function showLogin() {
+    appContent.classList.add("hidden");
+    loginScreen.classList.remove("hidden");
+    currentGames = [];
+    resetFormMode();
+    showEmptyTableMessage();
+}
+
+async function loginWithGoogle() {
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+            redirectTo: window.location.origin
+        }
+    });
+
+    if (error) {
+        alert(error.message || "No se pudo iniciar sesion con Google.");
+    }
+}
+
+async function logout() {
+    const { error } = await supabaseClient.auth.signOut();
+
+    if (error) {
+        alert(error.message || "No se pudo cerrar sesion.");
+    }
+}
 
 function showEmptyTableMessage() {
     gamesTableBody.innerHTML = `
@@ -206,4 +277,6 @@ async function deleteGame(gameId) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", loadGames);
+googleLoginButton.addEventListener("click", loginWithGoogle);
+logoutButton.addEventListener("click", logout);
+document.addEventListener("DOMContentLoaded", initializeSupabaseAuth);

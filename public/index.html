@@ -7,11 +7,43 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <main class="app">
+    <section id="login-screen" class="login-screen">
+        <div class="login-brand">
+            <img src="assets/gamevault-icon.png" alt="Icono de GameVault" class="brand-icon">
+            <span>GameVault</span>
+        </div>
+
+        <div class="login-card">
+            <h1 class="login-title">Iniciar sesión</h1>
+            <p class="app-description">Necesitas iniciar sesión para administrar tu colección de videojuegos en el sistema.</p>
+            <button type="button" id="google-login-button" class="primary-button">Continuar con Google</button>
+        </div>
+
+        <footer class="app-footer login-footer">
+            <p>
+                Creado por:
+                <a href="https://github.com/xmanusaddy" target="_blank" rel="noopener noreferrer">Darlyn Feliz</a>
+            </p>
+        </footer>
+    </section>
+
+    <main id="app-content" class="app hidden">
+        <div class="user-panel">
+            <img id="user-avatar" src="" alt="Foto de perfil" class="user-avatar">
+            <div class="user-details">
+                <span id="user-name"></span>
+                <small id="user-email"></small>
+            </div>
+            <button type="button" id="logout-button" class="secondary-button">Cerrar sesión</button>
+        </div>
+
         <header class="app-header">
             <div>
                 <p class="eyebrow">Consulta de videojuegos</p>
-                <h1>🎮 GameVault</h1>
+                <h1 class="brand-title">
+                    <img src="assets/gamevault-icon.png" alt="Icono de GameVault" class="brand-icon">
+                    <span>GameVault</span>
+                </h1>
             </div>
             <p class="app-description">
                 Sistema para registrar, consultar y administrar videojuegos con su género,
@@ -92,6 +124,7 @@
         </footer>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
 </body>
 </html>
