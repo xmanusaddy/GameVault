@@ -243,6 +243,26 @@ tbody tr:last-child td {
     background: rgba(255, 107, 122, 0.26);
 }
 
+.app-footer {
+    padding: 24px 0 4px;
+    color: var(--muted);
+    text-align: center;
+}
+
+.app-footer p {
+    margin-bottom: 0;
+}
+
+.app-footer a {
+    color: var(--accent);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.app-footer a:hover {
+    color: var(--accent-blue);
+}
+
 @media (max-width: 900px) {
     .app-header,
     .game-form {
