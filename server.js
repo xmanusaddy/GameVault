@@ -107,6 +107,61 @@ app.post("/games", async (req, res) => {
     }
 });
 
+app.put("/games/:id", async (req, res) => {
+    const { id } = req.params;
+    const { title, genre, platform, developer, release_year, price } = req.body;
+    const updatedGame = {
+        title: String(title || "").trim(),
+        genre: String(genre || "").trim(),
+        platform: String(platform || "").trim(),
+        developer: String(developer || "").trim(),
+        release_year: Number(release_year),
+        price: Number(price)
+    };
+
+    if (!id || !updatedGame.title || !updatedGame.genre || !updatedGame.platform || !updatedGame.developer || !updatedGame.release_year || Number.isNaN(updatedGame.price)) {
+        return res.status(400).json({
+            message: "Todos los campos son obligatorios."
+        });
+    }
+
+    try {
+        const { data, error } = await supabase
+            .from("games")
+            .update(updatedGame)
+            .eq("id", id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error("Error al actualizar videojuego en Supabase:", {
+                id,
+                payload: updatedGame,
+                code: error.code,
+                message: error.message,
+                details: error.details,
+                hint: error.hint
+            });
+
+            return res.status(500).json({
+                message: "No se pudo actualizar el videojuego.",
+                error: error.message
+            });
+        }
+
+        res.json({
+            message: "Videojuego actualizado correctamente.",
+            game: data
+        });
+    } catch (error) {
+        console.error("Error inesperado en PUT /games/:id:", error);
+
+        res.status(500).json({
+            message: "Ocurrio un error inesperado al actualizar el videojuego."
+        });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
 });
