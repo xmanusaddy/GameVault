@@ -7,6 +7,9 @@ const gameDeveloperInput = document.querySelector("#game-developer");
 const gameYearInput = document.querySelector("#game-year");
 const gamePriceInput = document.querySelector("#game-price");
 const gamesTableBody = document.querySelector("#games-table-body");
+const submitButton = gameForm.querySelector(".primary-button");
+let currentGames = [];
+let editingGameId = null;
 
 // Objeto base para mantener organizadas futuras referencias del formulario.
 const formFields = {
@@ -38,6 +41,7 @@ function createTableCell(text) {
 }
 
 function renderGames(games) {
+    currentGames = games;
     gamesTableBody.innerHTML = "";
 
     if (!games.length) {
@@ -53,6 +57,7 @@ function renderGames(games) {
 
         actionsCell.classList.add("actions");
         editButton.type = "button";
+        editButton.dataset.id = game.id;
         editButton.classList.add("secondary-button");
         editButton.textContent = "Editar";
         deleteButton.type = "button";
@@ -72,6 +77,23 @@ function renderGames(games) {
 
         gamesTableBody.appendChild(row);
     });
+}
+
+function resetFormMode() {
+    editingGameId = null;
+    submitButton.textContent = "Agregar videojuego";
+    gameForm.reset();
+}
+
+function fillFormForEdit(game) {
+    editingGameId = game.id;
+    formFields.name.value = game.title;
+    formFields.genre.value = game.genre;
+    formFields.platform.value = game.platform;
+    formFields.developer.value = game.developer;
+    formFields.year.value = game.release_year;
+    formFields.price.value = game.price;
+    submitButton.textContent = "Guardar cambios";
 }
 
 async function loadGames() {
@@ -110,8 +132,11 @@ gameForm.addEventListener("submit", async (event) => {
     }
 
     try {
-        const response = await fetch("/games", {
-            method: "POST",
+        const url = editingGameId ? `/games/${editingGameId}` : "/games";
+        const method = editingGameId ? "PUT" : "POST";
+
+        const response = await fetch(url, {
+            method,
             headers: {
                 "Content-Type": "application/json"
             },
@@ -125,9 +150,26 @@ gameForm.addEventListener("submit", async (event) => {
         }
 
         alert(result.message || "Videojuego agregado correctamente.");
-        gameForm.reset();
+        resetFormMode();
+
+        if (method === "PUT") {
+            await loadGames();
+        }
     } catch (error) {
         alert(error.message || "Ocurrio un error al guardar el videojuego.");
+    }
+});
+
+gamesTableBody.addEventListener("click", (event) => {
+    if (!event.target.classList.contains("secondary-button")) {
+        return;
+    }
+
+    const gameId = Number(event.target.dataset.id);
+    const selectedGame = currentGames.find((game) => game.id === gameId);
+
+    if (selectedGame) {
+        fillFormForEdit(selectedGame);
     }
 });
 
