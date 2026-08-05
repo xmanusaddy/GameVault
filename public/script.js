@@ -18,9 +18,16 @@ const gameYearInput = document.querySelector("#game-year");
 const gamePriceInput = document.querySelector("#game-price");
 const gamesTableBody = document.querySelector("#games-table-body");
 const submitButton = gameForm.querySelector(".primary-button");
+const toastMessage = document.querySelector("#toast-message");
+const deleteModal = document.querySelector("#delete-modal");
+const deleteModalMessage = document.querySelector("#delete-modal-message");
+const cancelDeleteButton = document.querySelector("#cancel-delete-button");
+const confirmDeleteButton = document.querySelector("#confirm-delete-button");
 let currentGames = [];
 let editingGameId = null;
 let supabaseClient = null;
+let toastTimeout = null;
+let deleteConfirmationResolver = null;
 
 const formFields = {
     name: gameNameInput,
@@ -87,6 +94,35 @@ function clearLoginError() {
 
 function isValidEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function showToast(message, type = "success") {
+    clearTimeout(toastTimeout);
+    toastMessage.textContent = message;
+    toastMessage.classList.remove("hidden", "success", "error");
+    toastMessage.classList.add(type);
+
+    toastTimeout = setTimeout(() => {
+        toastMessage.classList.add("hidden");
+    }, 3500);
+}
+
+function requestDeleteConfirmation(gameTitle) {
+    deleteModalMessage.textContent = `Seguro que deseas eliminar "${gameTitle}"?`;
+    deleteModal.classList.remove("hidden");
+
+    return new Promise((resolve) => {
+        deleteConfirmationResolver = resolve;
+    });
+}
+
+function closeDeleteModal(confirmed) {
+    deleteModal.classList.add("hidden");
+
+    if (deleteConfirmationResolver) {
+        deleteConfirmationResolver(confirmed);
+        deleteConfirmationResolver = null;
+    }
 }
 
 async function loginWithCredentials(event) {
@@ -246,7 +282,7 @@ gameForm.addEventListener("submit", async (event) => {
     const hasEmptyField = Object.values(gameData).some((value) => value === "");
 
     if (hasEmptyField) {
-        alert("Completa todos los campos antes de agregar el videojuego.");
+        showToast("Completa todos los campos antes de agregar el videojuego.", "error");
         return;
     }
 
@@ -268,11 +304,11 @@ gameForm.addEventListener("submit", async (event) => {
             throw new Error(result.message || "No se pudo guardar el videojuego.");
         }
 
-        alert(result.message || "Videojuego agregado correctamente.");
+        showToast(result.message || "Videojuego agregado correctamente.");
         resetFormMode();
         await loadGames();
     } catch (error) {
-        alert(error.message || "Ocurrio un error al guardar el videojuego.");
+        showToast(error.message || "Ocurrio un error al guardar el videojuego.", "error");
     }
 });
 
@@ -297,7 +333,7 @@ gamesTableBody.addEventListener("click", (event) => {
 async function deleteGame(gameId) {
     const selectedGame = currentGames.find((game) => game.id === gameId);
     const gameTitle = selectedGame ? selectedGame.title : "este videojuego";
-    const shouldDelete = confirm(`Seguro que deseas eliminar "${gameTitle}"?`);
+    const shouldDelete = await requestDeleteConfirmation(gameTitle);
 
     if (!shouldDelete) {
         return;
@@ -317,13 +353,15 @@ async function deleteGame(gameId) {
             resetFormMode();
         }
 
-        alert(result.message || "Videojuego eliminado correctamente.");
+        showToast(result.message || "Videojuego eliminado correctamente.");
         await loadGames();
     } catch (error) {
-        alert(error.message || "Ocurrio un error al eliminar el videojuego.");
+        showToast(error.message || "Ocurrio un error al eliminar el videojuego.", "error");
     }
 }
 
+cancelDeleteButton.addEventListener("click", () => closeDeleteModal(false));
+confirmDeleteButton.addEventListener("click", () => closeDeleteModal(true));
 credentialsLoginForm.addEventListener("submit", loginWithCredentials);
 googleLoginButton.addEventListener("click", loginWithGoogle);
 logoutButton.addEventListener("click", logout);

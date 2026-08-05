@@ -145,6 +145,19 @@
         </footer>
     </main>
 
+    <div id="toast-message" class="toast-message hidden" role="status" aria-live="polite"></div>
+
+    <div id="delete-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+        <div class="modal-box">
+            <h2 id="delete-modal-title">Eliminar videojuego</h2>
+            <p id="delete-modal-message">Seguro que deseas eliminar este videojuego?</p>
+            <div class="modal-actions">
+                <button type="button" id="cancel-delete-button" class="secondary-button">Cancelar</button>
+                <button type="button" id="confirm-delete-button" class="danger-button">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
 </body>

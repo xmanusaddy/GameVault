@@ -398,6 +398,64 @@ tbody tr:last-child td {
     color: var(--accent-blue);
 }
 
+.toast-message {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 20;
+    width: min(360px, calc(100% - 48px));
+    padding: 14px 16px;
+    color: var(--text);
+    border: 1px solid rgba(39, 224, 163, 0.35);
+    border-radius: 8px;
+    background: rgba(18, 26, 47, 0.97);
+    box-shadow: var(--shadow);
+    font-weight: 700;
+}
+
+.toast-message.success {
+    border-color: rgba(39, 224, 163, 0.5);
+}
+
+.toast-message.error {
+    border-color: rgba(255, 107, 122, 0.58);
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: rgba(5, 9, 18, 0.72);
+}
+
+.modal-box {
+    width: min(420px, 100%);
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.modal-box h2 {
+    margin-bottom: 10px;
+}
+
+.modal-box p {
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 22px;
+}
+
 @media (max-width: 900px) {
     .app-header,
     .game-form {
