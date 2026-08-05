@@ -16,7 +16,28 @@
         <div class="login-card">
             <h1 class="login-title">Iniciar sesión</h1>
             <p class="app-description">Necesitas iniciar sesión para administrar tu colección de videojuegos en el sistema.</p>
-            <button type="button" id="google-login-button" class="primary-button">Continuar con Google</button>
+            <form id="credentials-login-form" class="login-form">
+                <div class="form-group">
+                    <label for="login-email">Correo electrónico</label>
+                    <input type="email" id="login-email" data-testid="email-input" placeholder="correo@ejemplo.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="login-password">Contraseña</label>
+                    <input type="password" id="login-password" data-testid="password-input" placeholder="Tu contraseña">
+                </div>
+
+                <p id="login-error" class="login-error hidden" data-testid="login-error"></p>
+                <button type="submit" class="primary-button" data-testid="login-button">Iniciar sesión</button>
+            </form>
+
+            <div class="login-divider">
+                <span></span>
+                <p>o continúa con</p>
+                <span></span>
+            </div>
+
+            <button type="button" id="google-login-button" class="primary-button" data-testid="google-login-button">Continuar con Google</button>
         </div>
 
         <footer class="app-footer login-footer">
@@ -27,14 +48,14 @@
         </footer>
     </section>
 
-    <main id="app-content" class="app hidden">
+    <main id="app-content" class="app hidden" data-testid="authenticated-view">
         <div class="user-panel">
             <img id="user-avatar" src="" alt="Foto de perfil" class="user-avatar">
             <div class="user-details">
                 <span id="user-name"></span>
                 <small id="user-email"></small>
             </div>
-            <button type="button" id="logout-button" class="secondary-button">Cerrar sesión</button>
+            <button type="button" id="logout-button" class="secondary-button" data-testid="logout-button">Cerrar sesión</button>
         </div>
 
         <header class="app-header">
