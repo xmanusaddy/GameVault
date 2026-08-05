@@ -1,5 +1,9 @@
 const loginScreen = document.querySelector("#login-screen");
 const appContent = document.querySelector("#app-content");
+const credentialsLoginForm = document.querySelector("#credentials-login-form");
+const loginEmailInput = document.querySelector("#login-email");
+const loginPasswordInput = document.querySelector("#login-password");
+const loginError = document.querySelector("#login-error");
 const googleLoginButton = document.querySelector("#google-login-button");
 const logoutButton = document.querySelector("#logout-button");
 const userAvatar = document.querySelector("#user-avatar");
@@ -66,10 +70,60 @@ function showLogin() {
     loginScreen.classList.remove("hidden");
     currentGames = [];
     resetFormMode();
+    credentialsLoginForm.reset();
+    clearLoginError();
     showEmptyTableMessage();
 }
 
+function showLoginError(message) {
+    loginError.textContent = message;
+    loginError.classList.remove("hidden");
+}
+
+function clearLoginError() {
+    loginError.textContent = "";
+    loginError.classList.add("hidden");
+}
+
+function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+async function loginWithCredentials(event) {
+    event.preventDefault();
+    clearLoginError();
+
+    const email = loginEmailInput.value.trim();
+    const password = loginPasswordInput.value;
+
+    if (!email) {
+        showLoginError("Ingresa tu correo electrónico.");
+        return;
+    }
+
+    if (!isValidEmail(email)) {
+        showLoginError("Ingresa un correo electrónico válido.");
+        return;
+    }
+
+    if (!password) {
+        showLoginError("Ingresa tu contraseña.");
+        return;
+    }
+
+    const { error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+    });
+
+    if (error) {
+        showLoginError("Correo o contraseña incorrectos.");
+    }
+}
+
 async function loginWithGoogle() {
+    clearLoginError();
+
     const { error } = await supabaseClient.auth.signInWithOAuth({
         provider: "google",
         options: {
@@ -270,6 +324,7 @@ async function deleteGame(gameId) {
     }
 }
 
+credentialsLoginForm.addEventListener("submit", loginWithCredentials);
 googleLoginButton.addEventListener("click", loginWithGoogle);
 logoutButton.addEventListener("click", logout);
 document.addEventListener("DOMContentLoaded", initializeSupabaseAuth);
