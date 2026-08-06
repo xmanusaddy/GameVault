@@ -27,6 +27,13 @@ describe("GameVault - inicio de sesión", function () {
         );
     }
 
+    async function typeSlowly(element, text) {
+        for (const character of String(text)) {
+            await element.sendKeys(character);
+            await driver.sleep(45);
+        }
+    }
+
     async function resetSession() {
         await driver.get(APP_URL);
 
@@ -42,6 +49,11 @@ describe("GameVault - inicio de sesión", function () {
 
         await driver.manage().deleteAllCookies();
         await driver.navigate().refresh();
+
+        await driver.wait(
+            until.elementLocated(By.css('[data-testid="email-input"]')),
+            10000
+        );
     }
 
     before(async function () {
@@ -77,8 +89,8 @@ describe("GameVault - inicio de sesión", function () {
             By.css('[data-testid="login-button"]')
         );
 
-        await emailInput.sendKeys(TEST_EMAIL);
-        await passwordInput.sendKeys(TEST_PASSWORD);
+        await typeSlowly(emailInput, TEST_EMAIL);
+        await typeSlowly(passwordInput, TEST_PASSWORD);
         await loginButton.click();
 
         const authenticatedView = await driver.wait(
@@ -114,8 +126,8 @@ describe("GameVault - inicio de sesión", function () {
             By.css('[data-testid="login-button"]')
         );
 
-        await emailInput.sendKeys(TEST_EMAIL);
-        await passwordInput.sendKeys("ContraseñaIncorrecta123!");
+        await typeSlowly(emailInput, TEST_EMAIL);
+        await typeSlowly(passwordInput, "ContraseñaIncorrecta123!");
         await loginButton.click();
 
         const errorElement = await driver.wait(

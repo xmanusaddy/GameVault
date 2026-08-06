@@ -28,6 +28,13 @@ describe("GameVault - registrar videojuego", function () {
         );
     }
 
+    async function typeSlowly(element, text) {
+        for (const character of String(text)) {
+            await element.sendKeys(character);
+            await driver.sleep(45);
+        }
+    }
+
     async function login() {
         await driver.get(APP_URL);
 
@@ -44,8 +51,8 @@ describe("GameVault - registrar videojuego", function () {
             By.css('[data-testid="login-button"]')
         );
 
-        await emailInput.sendKeys(TEST_EMAIL);
-        await passwordInput.sendKeys(TEST_PASSWORD);
+        await typeSlowly(emailInput, TEST_EMAIL);
+        await typeSlowly(passwordInput, TEST_PASSWORD);
         await loginButton.click();
 
         const authenticatedView = await driver.wait(
@@ -77,6 +84,31 @@ describe("GameVault - registrar videojuego", function () {
         }
     }
 
+    async function waitForToast(expectedText) {
+        const toast = await driver.wait(
+            until.elementLocated(By.id("toast-message")),
+            10000
+        );
+        let matchedText = "";
+
+        await driver.wait(async () => {
+            const isVisible = await toast.isDisplayed();
+            const text = await toast.getText();
+            const normalizedText = text.toLowerCase();
+            const matches = isVisible &&
+                text.trim().length > 0 &&
+                normalizedText.includes(expectedText.toLowerCase());
+
+            if (matches) {
+                matchedText = text;
+            }
+
+            return matches;
+        }, 10000);
+
+        return matchedText;
+    }
+
     before(async function () {
         if (!TEST_EMAIL || !TEST_PASSWORD) {
             throw new Error("Faltan las credenciales de prueba en el archivo .env");
@@ -104,30 +136,18 @@ describe("GameVault - registrar videojuego", function () {
     it("camino feliz: debe registrar un videojuego válido", async function () {
         const gameName = `Selenium Game ${Date.now()}`;
 
-        await driver.findElement(By.id("game-name")).sendKeys(gameName);
-        await driver.findElement(By.id("game-genre")).sendKeys("Aventura");
-        await driver.findElement(By.id("game-platform")).sendKeys("PC");
-        await driver.findElement(By.id("game-developer")).sendKeys("Selenium Studio");
-        await driver.findElement(By.id("game-year")).sendKeys("2025");
-        await driver.findElement(By.id("game-price")).sendKeys("39.99");
+        await typeSlowly(await driver.findElement(By.id("game-name")), gameName);
+        await typeSlowly(await driver.findElement(By.id("game-genre")), "Aventura");
+        await typeSlowly(await driver.findElement(By.id("game-platform")), "PC");
+        await typeSlowly(await driver.findElement(By.id("game-developer")), "Selenium Studio");
+        await typeSlowly(await driver.findElement(By.id("game-year")), "2025");
+        await typeSlowly(await driver.findElement(By.id("game-price")), "39.99");
 
         await driver.findElement(
             By.css('#game-form button[type="submit"]')
         ).click();
 
-        const toast = await driver.wait(
-            until.elementLocated(By.id("toast-message")),
-            10000
-        );
-
-        await driver.wait(async () => {
-            const isVisible = await toast.isDisplayed();
-            const toastText = await toast.getText();
-
-            return isVisible && toastText.trim().length > 0;
-        }, 10000);
-
-        const toastText = await toast.getText();
+        const toastText = await waitForToast("videojuego creado correctamente");
 
         assert.ok(
             toastText.toLowerCase().includes("videojuego creado correctamente"),
@@ -155,12 +175,12 @@ describe("GameVault - registrar videojuego", function () {
     });
 
     it("prueba negativa: debe rechazar un precio negativo", async function () {
-        await driver.findElement(By.id("game-name")).sendKeys("Juego inválido");
-        await driver.findElement(By.id("game-genre")).sendKeys("Acción");
-        await driver.findElement(By.id("game-platform")).sendKeys("PC");
-        await driver.findElement(By.id("game-developer")).sendKeys("Test Studio");
-        await driver.findElement(By.id("game-year")).sendKeys("2024");
-        await driver.findElement(By.id("game-price")).sendKeys("-1");
+        await typeSlowly(await driver.findElement(By.id("game-name")), "Juego inválido");
+        await typeSlowly(await driver.findElement(By.id("game-genre")), "Acción");
+        await typeSlowly(await driver.findElement(By.id("game-platform")), "PC");
+        await typeSlowly(await driver.findElement(By.id("game-developer")), "Test Studio");
+        await typeSlowly(await driver.findElement(By.id("game-year")), "2024");
+        await typeSlowly(await driver.findElement(By.id("game-price")), "-1");
 
         const priceInput = await driver.findElement(By.id("game-price"));
 

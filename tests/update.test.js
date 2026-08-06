@@ -29,6 +29,13 @@ describe("GameVault - editar videojuego", function () {
         );
     }
 
+    async function typeSlowly(element, text) {
+        for (const character of String(text)) {
+            await element.sendKeys(character);
+            await driver.sleep(45);
+        }
+    }
+
     async function login() {
         await driver.get(APP_URL);
 
@@ -45,8 +52,8 @@ describe("GameVault - editar videojuego", function () {
             By.css('[data-testid="login-button"]')
         );
 
-        await emailInput.sendKeys(TEST_EMAIL);
-        await passwordInput.sendKeys(TEST_PASSWORD);
+        await typeSlowly(emailInput, TEST_EMAIL);
+        await typeSlowly(passwordInput, TEST_PASSWORD);
         await loginButton.click();
 
         const authenticatedView = await driver.wait(
@@ -62,35 +69,63 @@ describe("GameVault - editar videojuego", function () {
         );
     }
 
-    async function waitForToast() {
+    async function waitForToast(expectedText = "") {
         const toast = await driver.wait(
             until.elementLocated(By.id("toast-message")),
             10000
         );
+        let matchedText = "";
 
         await driver.wait(async () => {
+            const isVisible = await toast.isDisplayed();
             const text = await toast.getText();
-            return text.trim().length > 0;
+            const normalizedText = text.toLowerCase();
+            const matches = isVisible &&
+                text.trim().length > 0 &&
+                normalizedText.includes(expectedText.toLowerCase());
+
+            if (matches) {
+                matchedText = text;
+            }
+
+            return matches;
         }, 10000);
 
-        return toast.getText();
+        return matchedText;
+    }
+
+    async function clearForm() {
+        const fields = [
+            "game-name",
+            "game-genre",
+            "game-platform",
+            "game-developer",
+            "game-year",
+            "game-price"
+        ];
+
+        for (const id of fields) {
+            const input = await driver.findElement(By.id(id));
+            await input.clear();
+        }
     }
 
     async function createGame() {
         gameName = `Update Game ${Date.now()}`;
 
-        await driver.findElement(By.id("game-name")).sendKeys(gameName);
-        await driver.findElement(By.id("game-genre")).sendKeys("Aventura");
-        await driver.findElement(By.id("game-platform")).sendKeys("PC");
-        await driver.findElement(By.id("game-developer")).sendKeys("Update Studio");
-        await driver.findElement(By.id("game-year")).sendKeys("2024");
-        await driver.findElement(By.id("game-price")).sendKeys("29.99");
+        await clearForm();
+        await typeSlowly(await driver.findElement(By.id("game-name")), gameName);
+        await typeSlowly(await driver.findElement(By.id("game-genre")), "Aventura");
+        await typeSlowly(await driver.findElement(By.id("game-platform")), "PC");
+        await typeSlowly(await driver.findElement(By.id("game-developer")), "Update Studio");
+        await typeSlowly(await driver.findElement(By.id("game-year")), "2024");
+        await typeSlowly(await driver.findElement(By.id("game-price")), "29.99");
 
         await driver.findElement(
             By.css('#game-form button[type="submit"]')
         ).click();
 
-        await waitForToast();
+        await waitForToast("creado");
 
         await driver.wait(async () => {
             const tableText = await driver.findElement(
@@ -154,13 +189,13 @@ describe("GameVault - editar videojuego", function () {
         const updatedName = `${gameName} Editado`;
 
         await nameInput.clear();
-        await nameInput.sendKeys(updatedName);
+        await typeSlowly(nameInput, updatedName);
 
         await driver.findElement(
             By.css('#game-form button[type="submit"]')
         ).click();
 
-        const toastText = await waitForToast();
+        const toastText = await waitForToast("actualizado");
 
         assert.ok(
             toastText.toLowerCase().includes("videojuego"),
@@ -195,7 +230,7 @@ describe("GameVault - editar videojuego", function () {
         const priceInput = await driver.findElement(By.id("game-price"));
 
         await priceInput.clear();
-        await priceInput.sendKeys("-5");
+        await typeSlowly(priceInput, "-5");
 
         await driver.findElement(
             By.css('#game-form button[type="submit"]')
@@ -221,7 +256,7 @@ describe("GameVault - editar videojuego", function () {
         const yearInput = await driver.findElement(By.id("game-year"));
 
         await yearInput.clear();
-        await yearInput.sendKeys("2101");
+        await typeSlowly(yearInput, "2101");
 
         await driver.findElement(
             By.css('#game-form button[type="submit"]')
