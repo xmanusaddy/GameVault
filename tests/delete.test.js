@@ -29,6 +29,13 @@ describe("GameVault - eliminar videojuego", function () {
         );
     }
 
+    async function typeSlowly(element, text) {
+        for (const character of String(text)) {
+            await element.sendKeys(character);
+            await driver.sleep(45);
+        }
+    }
+
     async function login() {
         await driver.get(APP_URL);
 
@@ -37,11 +44,13 @@ describe("GameVault - eliminar videojuego", function () {
             10000
         );
 
-        await emailInput.sendKeys(TEST_EMAIL);
+        await typeSlowly(emailInput, TEST_EMAIL);
 
-        await driver.findElement(
+        const passwordInput = await driver.findElement(
             By.css('[data-testid="password-input"]')
-        ).sendKeys(TEST_PASSWORD);
+        );
+
+        await typeSlowly(passwordInput, TEST_PASSWORD);
 
         await driver.findElement(
             By.css('[data-testid="login-button"]')
@@ -60,35 +69,63 @@ describe("GameVault - eliminar videojuego", function () {
         );
     }
 
-    async function waitForToast() {
+    async function waitForToast(expectedText = "") {
         const toast = await driver.wait(
             until.elementLocated(By.id("toast-message")),
             10000
         );
+        let matchedText = "";
 
         await driver.wait(async () => {
+            const isVisible = await toast.isDisplayed();
             const text = await toast.getText();
-            return text.trim().length > 0;
+            const normalizedText = text.toLowerCase();
+            const matches = isVisible &&
+                text.trim().length > 0 &&
+                normalizedText.includes(expectedText.toLowerCase());
+
+            if (matches) {
+                matchedText = text;
+            }
+
+            return matches;
         }, 10000);
 
-        return toast.getText();
+        return matchedText;
+    }
+
+    async function clearForm() {
+        const fields = [
+            "game-name",
+            "game-genre",
+            "game-platform",
+            "game-developer",
+            "game-year",
+            "game-price"
+        ];
+
+        for (const id of fields) {
+            const input = await driver.findElement(By.id(id));
+            await input.clear();
+        }
     }
 
     async function createGame() {
         gameName = `Delete Game ${Date.now()}`;
 
-        await driver.findElement(By.id("game-name")).sendKeys(gameName);
-        await driver.findElement(By.id("game-genre")).sendKeys("Acción");
-        await driver.findElement(By.id("game-platform")).sendKeys("PC");
-        await driver.findElement(By.id("game-developer")).sendKeys("Delete Studio");
-        await driver.findElement(By.id("game-year")).sendKeys("2025");
-        await driver.findElement(By.id("game-price")).sendKeys("49.99");
+        await clearForm();
+        await typeSlowly(await driver.findElement(By.id("game-name")), gameName);
+        await typeSlowly(await driver.findElement(By.id("game-genre")), "Acción");
+        await typeSlowly(await driver.findElement(By.id("game-platform")), "PC");
+        await typeSlowly(await driver.findElement(By.id("game-developer")), "Delete Studio");
+        await typeSlowly(await driver.findElement(By.id("game-year")), "2025");
+        await typeSlowly(await driver.findElement(By.id("game-price")), "49.99");
 
         await driver.findElement(
             By.css('#game-form button[type="submit"]')
         ).click();
 
-        await waitForToast();
+        await waitForToast("creado");
 
         await driver.wait(async () => {
             const table = await driver.findElement(
@@ -100,10 +137,25 @@ describe("GameVault - eliminar videojuego", function () {
     }
 
     async function findRow() {
-        return driver.findElement(
-            By.xpath(
-                `//tbody[@id="games-table-body"]/tr[td[1][normalize-space()="${gameName}"]]`
-            )
+        return driver.wait(
+            until.elementLocated(
+                By.xpath(
+                    `//tbody[@id="games-table-body"]/tr[td[1][normalize-space()="${gameName}"]]`
+                )
+            ),
+            15000
+        );
+    }
+
+    async function waitForDeleteModal() {
+        const modal = await driver.wait(
+            until.elementLocated(By.id("delete-modal")),
+            10000
+        );
+
+        await driver.wait(
+            until.elementIsVisible(modal),
+            10000
         );
     }
 
@@ -135,16 +187,13 @@ describe("GameVault - eliminar videojuego", function () {
             By.css(".danger-button")
         ).click();
 
-        await driver.wait(
-            until.elementLocated(By.id("delete-modal")),
-            10000
-        );
+        await waitForDeleteModal();
 
         await driver.findElement(
             By.id("confirm-delete-button")
         ).click();
 
-        const toastText = await waitForToast();
+        const toastText = await waitForToast("eliminado");
 
         assert.ok(
             toastText.toLowerCase().includes("videojuego"),
@@ -171,6 +220,8 @@ describe("GameVault - eliminar videojuego", function () {
             By.css(".danger-button")
         ).click();
 
+        await waitForDeleteModal();
+
         await driver.findElement(
             By.id("cancel-delete-button")
         ).click();
@@ -193,6 +244,8 @@ describe("GameVault - eliminar videojuego", function () {
         await row.findElement(
             By.css(".danger-button")
         ).click();
+
+        await waitForDeleteModal();
 
         const cancelButton = await driver.findElement(
             By.id("cancel-delete-button")

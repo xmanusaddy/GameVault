@@ -28,6 +28,13 @@ describe("GameVault - consultar videojuegos", function () {
         );
     }
 
+    async function typeSlowly(element, text) {
+        for (const character of String(text)) {
+            await element.sendKeys(character);
+            await driver.sleep(45);
+        }
+    }
+
     async function login() {
         await driver.get(APP_URL);
 
@@ -44,8 +51,8 @@ describe("GameVault - consultar videojuegos", function () {
             By.css('[data-testid="login-button"]')
         );
 
-        await emailInput.sendKeys(TEST_EMAIL);
-        await passwordInput.sendKeys(TEST_PASSWORD);
+        await typeSlowly(emailInput, TEST_EMAIL);
+        await typeSlowly(passwordInput, TEST_PASSWORD);
         await loginButton.click();
 
         const authenticatedView = await driver.wait(
